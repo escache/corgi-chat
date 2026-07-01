@@ -1,6 +1,24 @@
 {
   "name": "corgi-chat",
   "version": "0.0.1",
+  "private": true,
+  "license": "MIT",
+  "packageManager": "pnpm@9.15.0",
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "lint": "turbo lint --filter=@corgi-chat/*",
+    "typecheck": "turbo typecheck --filter=@corgi-chat/*",
+    "test": "turbo test --filter=@corgi-chat/*",
+    "db:generate": "pnpm --filter @corgi-chat/db generate",
+    "db:push": "pnpm --filter @corgi-chat/db push",
+    "legacy:start": "concurrently -n client,server -c blue,magenta \"pnpm --filter client start\" \"pnpm --filter server start-dev\""
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "turbo": "^2.5.4",
+    "typescript": "^5.8.3"
+  }
   "license": "MIT",
   "private": true,
   "workspaces": {
