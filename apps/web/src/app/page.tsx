@@ -6,6 +6,8 @@ import { HomeLobby } from "@corgi-chat/ui";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { AuthHeader } from "@/components/auth-header";
+
 export default function HomePage() {
   const router = useRouter();
   const { isSignedIn } = useAuth();
@@ -18,7 +20,7 @@ export default function HomePage() {
     <HomeLobby
       isSignedIn={Boolean(isSignedIn) || guestReady}
       userName={user?.fullName ?? user?.username}
-      onSignIn={() => router.push("/sign-in")}
+      authHeader={<AuthHeader />}
       onContinueAsGuest={async (displayName) => {
         setError(null);
         const response = await fetch("/api/guest", {
