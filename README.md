@@ -53,7 +53,7 @@ Open http://localhost:3000
 |-------|--------|
 | 0 Foundation | Complete |
 | 1 Auth & Rooms | Complete |
-| 2 LiveKit video | Pending |
+| 2 LiveKit video | Complete |
 | 3 Persistent chat | Pending |
 | 4 Activities | Pending |
 | 5 Cutover | Pending |

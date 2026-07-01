@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 
 import { Button } from "../components/button";
 import { Card } from "../components/card";
@@ -9,7 +9,7 @@ import { Input } from "../components/input";
 export interface HomeLobbyProps {
   isSignedIn: boolean;
   userName?: string | null;
-  onSignIn: () => void;
+  authHeader?: ReactNode;
   onContinueAsGuest: (displayName: string) => Promise<void>;
   onCreateRoom: (name: string) => Promise<void>;
   isCreating?: boolean;
@@ -19,7 +19,7 @@ export interface HomeLobbyProps {
 export function HomeLobby({
   isSignedIn,
   userName,
-  onSignIn,
+  authHeader,
   onContinueAsGuest,
   onCreateRoom,
   isCreating = false,
@@ -35,12 +35,10 @@ export function HomeLobby({
         <div className="relative mx-auto flex min-h-screen max-w-6xl flex-col px-6 py-8">
           <header className="flex items-center justify-between">
             <div className="text-lg font-semibold tracking-tight">corgi chat</div>
-            {!isSignedIn ? (
-              <Button variant="secondary" onClick={onSignIn}>
-                Sign in
-              </Button>
-            ) : (
-              <div className="text-sm text-slate-300">Signed in as {userName}</div>
+            {authHeader ?? (
+              isSignedIn ? (
+                <div className="text-sm text-slate-300">Signed in as {userName}</div>
+              ) : null
             )}
           </header>
 

@@ -4,14 +4,17 @@ import { eq } from "drizzle-orm";
 
 import { getDb, users, type User } from "@corgi-chat/db";
 
+import { isClerkEnabled } from "./clerk-config";
 import { GUEST_COOKIE_NAME } from "./guest";
 
 export async function getCurrentUser(): Promise<User | null> {
   const db = getDb();
-  const clerkAuth = await auth();
-  const clerkUser = clerkAuth.userId ? await currentUser() : null;
 
-  if (clerkUser) {
+  if (isClerkEnabled()) {
+    const clerkAuth = await auth();
+    const clerkUser = clerkAuth.userId ? await currentUser() : null;
+
+    if (clerkUser) {
     const existing = await db.query.users.findFirst({
       where: eq(users.clerkId, clerkUser.id),
     });
@@ -35,7 +38,8 @@ export async function getCurrentUser(): Promise<User | null> {
       })
       .returning();
 
-    return created;
+      return created;
+    }
   }
 
   const cookieStore = await cookies();

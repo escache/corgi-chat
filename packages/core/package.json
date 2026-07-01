@@ -5,7 +5,8 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
-    "./rooms": "./src/rooms/index.ts"
+    "./rooms": "./src/rooms/index.ts",
+    "./livekit": "./src/livekit/index.ts"
   },
   "scripts": {
     "build": "tsc",
