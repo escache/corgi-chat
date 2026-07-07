@@ -5,6 +5,8 @@ import { CallPreview, RoomLobby, VideoRoom } from "@corgi-chat/ui";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
+import { useSupabaseMessageRealtime } from "@/hooks/use-supabase-message-realtime";
+
 import "@livekit/components-styles";
 
 type RoomView = "lobby" | "preview" | "call";
@@ -21,6 +23,8 @@ export default function RoomPage() {
   const [livekitConfigured, setLivekitConfigured] = useState(true);
 
   const tokenQuery = useLiveKitToken(slug, view === "call");
+
+  useSupabaseMessageRealtime(slug, view === "lobby" && Boolean(currentUserId));
 
   useEffect(() => {
     void fetch("/api/me")
@@ -140,6 +144,7 @@ export default function RoomPage() {
       livekitConfigured={livekitConfigured}
       isJoining={joinRoom.isPending}
       error={error}
+      giphyApiKey={process.env.NEXT_PUBLIC_GIPHY_API_KEY}
       onStartVideo={() => setView("preview")}
       onJoinLobby={async () => {
         setError(null);

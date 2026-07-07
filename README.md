@@ -85,7 +85,7 @@ pnpm dev
 | 0 Foundation | Complete |
 | 1 Auth & Rooms | Complete |
 | 2 LiveKit video | Complete |
-| 3 Persistent chat | Pending |
+| 3 Persistent chat | Complete |
 | 4 Activities | Pending |
 | 5 Cutover | Pending |
 | 6 Desktop (Tauri) | Pending |
