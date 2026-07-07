@@ -6,7 +6,8 @@
   "exports": {
     ".": "./src/index.ts",
     "./lobby": "./src/lobby/index.ts",
-    "./room": "./src/room/index.ts"
+    "./room": "./src/room/index.ts",
+    "./chat": "./src/chat/index.ts"
   },
   "scripts": {
     "build": "tsc",
