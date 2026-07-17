@@ -1,4 +1,0 @@
-
-> @corgi-chat/core@0.0.1 typecheck /workspace/packages/core
-> tsc --noEmit
-

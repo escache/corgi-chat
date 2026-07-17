@@ -12,6 +12,10 @@ coverage
 build
 dist
 
+# turbo
+.turbo
+**/.turbo
+
 # misc
 .DS_Store
 .env.local
