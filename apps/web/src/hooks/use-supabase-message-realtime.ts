@@ -5,7 +5,11 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 
 /** Subscribe to Supabase Realtime when env vars are configured. */
-export function useSupabaseMessageRealtime(roomSlug: string, enabled = true) {
+export function useSupabaseMessageRealtime(
+  roomSlug: string,
+  options: { enabled?: boolean; roomId?: string } = {},
+) {
+  const { enabled = true, roomId } = options;
   const queryClient = useQueryClient();
 
   useEffect(() => {
@@ -30,11 +34,18 @@ export function useSupabaseMessageRealtime(roomSlug: string, enabled = true) {
         }
 
         const supabase = createClient(supabaseUrl, supabaseAnonKey);
+        const filter = roomId ? `room_id=eq.${roomId}` : undefined;
+
         channel = supabase
           .channel(`room-messages:${roomSlug}`)
           .on(
             "postgres_changes",
-            { event: "INSERT", schema: "public", table: "messages" },
+            {
+              event: "INSERT",
+              schema: "public",
+              table: "messages",
+              ...(filter ? { filter } : {}),
+            },
             () => {
               void queryClient.invalidateQueries({ queryKey: messagesQueryKey(roomSlug) });
             },
@@ -47,5 +58,5 @@ export function useSupabaseMessageRealtime(roomSlug: string, enabled = true) {
       cancelled = true;
       channel?.unsubscribe();
     };
-  }, [enabled, queryClient, roomSlug]);
+  }, [enabled, queryClient, roomId, roomSlug]);
 }

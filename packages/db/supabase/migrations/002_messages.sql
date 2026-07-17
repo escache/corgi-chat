@@ -22,3 +22,16 @@ CREATE POLICY "messages_read_if_member" ON messages
         AND room_members.user_id = auth.uid()::uuid
     )
   );
+
+-- Writes go through the Next.js API (service role). This policy still
+-- documents the membership rule and blocks direct client inserts.
+CREATE POLICY "messages_insert_if_member" ON messages
+  FOR INSERT WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM room_members
+      WHERE room_members.room_id = messages.room_id
+        AND room_members.user_id = auth.uid()::uuid
+    )
+    AND (user_id IS NULL OR user_id = auth.uid()::uuid)
+    AND type IN ('text', 'gif')
+  );

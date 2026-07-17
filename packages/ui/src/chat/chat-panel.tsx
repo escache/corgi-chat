@@ -1,19 +1,24 @@
 "use client";
 
 import type { ChatMessage } from "@corgi-chat/core";
-import { useMessages, useSendMessage } from "@corgi-chat/core";
-import { useEffect, useRef, useState } from "react";
+import { fetchMessages, useMessages, useSendMessage } from "@corgi-chat/core";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
+import { Theme } from "emoji-picker-react";
 
 import { Button } from "../components/button";
 import { Card } from "../components/card";
 import { Input } from "../components/input";
+import { cn } from "../lib/cn";
 
-const QUICK_EMOJIS = ["😀", "😂", "❤️", "👍", "🎉", "🔥", "👋", "😮"];
+const EmojiPicker = lazy(() => import("emoji-picker-react"));
 
 export interface ChatPanelProps {
   roomSlug: string;
   enabled?: boolean;
   giphyApiKey?: string;
+  /** Compact sidebar layout for in-call view */
+  compact?: boolean;
+  className?: string;
 }
 
 function formatTime(iso: string) {
@@ -60,21 +65,43 @@ function MessageBubble({ message }: { message: ChatMessage }) {
   );
 }
 
-export function ChatPanel({ roomSlug, enabled = true, giphyApiKey }: ChatPanelProps) {
+export function ChatPanel({
+  roomSlug,
+  enabled = true,
+  giphyApiKey,
+  compact = false,
+  className,
+}: ChatPanelProps) {
   const messagesQuery = useMessages(roomSlug, enabled);
   const sendMessage = useSendMessage(roomSlug);
   const [draft, setDraft] = useState("");
   const [showEmojis, setShowEmojis] = useState(false);
+  const [showGiphy, setShowGiphy] = useState(false);
   const [gifQuery, setGifQuery] = useState("");
   const [gifResults, setGifResults] = useState<Array<{ url: string; title: string }>>([]);
+  const [earlierMessages, setEarlierMessages] = useState<ChatMessage[]>([]);
+  const [hasMore, setHasMore] = useState(false);
+  const [loadingEarlier, setLoadingEarlier] = useState(false);
   const listRef = useRef<HTMLUListElement>(null);
+  const stickToBottomRef = useRef(true);
+
+  const liveMessages = messagesQuery.data?.messages ?? [];
+  const allMessages = [...earlierMessages, ...liveMessages].filter(
+    (message, index, list) => list.findIndex((item) => item.id === message.id) === index,
+  );
+
+  useEffect(() => {
+    if (messagesQuery.data) {
+      setHasMore(messagesQuery.data.hasMore);
+    }
+  }, [messagesQuery.data]);
 
   useEffect(() => {
     const list = listRef.current;
-    if (list) {
+    if (list && stickToBottomRef.current) {
       list.scrollTop = list.scrollHeight;
     }
-  }, [messagesQuery.data?.messages.length]);
+  }, [allMessages.length]);
 
   const handleSend = async () => {
     const body = draft.trim();
@@ -83,6 +110,7 @@ export function ChatPanel({ roomSlug, enabled = true, giphyApiKey }: ChatPanelPr
     }
 
     setDraft("");
+    stickToBottomRef.current = true;
     try {
       await sendMessage.mutateAsync({ body, type: "text" });
     } catch {
@@ -115,6 +143,7 @@ export function ChatPanel({ roomSlug, enabled = true, giphyApiKey }: ChatPanelPr
   };
 
   const sendGif = async (gifUrl: string, title: string) => {
+    stickToBottomRef.current = true;
     await sendMessage.mutateAsync({
       body: title || "GIF",
       type: "gif",
@@ -122,16 +151,62 @@ export function ChatPanel({ roomSlug, enabled = true, giphyApiKey }: ChatPanelPr
     });
     setGifResults([]);
     setGifQuery("");
+    setShowGiphy(false);
+  };
+
+  const loadEarlier = async () => {
+    if (!allMessages.length || loadingEarlier) {
+      return;
+    }
+
+    setLoadingEarlier(true);
+    stickToBottomRef.current = false;
+    try {
+      const oldest = allMessages[0];
+      const page = await fetchMessages(roomSlug, { before: oldest.createdAt, limit: 50 });
+      setEarlierMessages((current) => [...page.messages, ...current]);
+      setHasMore(page.hasMore);
+    } finally {
+      setLoadingEarlier(false);
+    }
   };
 
   return (
-    <Card className="flex min-h-[360px] flex-col overflow-hidden p-0">
+    <Card
+      className={cn(
+        "flex flex-col overflow-hidden p-0",
+        compact ? "min-h-0 h-full" : "min-h-[360px]",
+        className,
+      )}
+    >
       <div className="border-b border-slate-800 px-4 py-3">
         <h2 className="text-lg font-semibold">Chat</h2>
-        <p className="text-xs text-slate-500">Messages are saved for everyone in the room.</p>
+        {!compact ? (
+          <p className="text-xs text-slate-500">Messages are saved for everyone in the room.</p>
+        ) : null}
       </div>
 
-      <ul ref={listRef} className="flex-1 space-y-1 overflow-y-auto px-4 py-3">
+      <ul
+        ref={listRef}
+        className="flex-1 space-y-1 overflow-y-auto px-4 py-3"
+        onScroll={(event) => {
+          const target = event.currentTarget;
+          stickToBottomRef.current =
+            target.scrollHeight - target.scrollTop - target.clientHeight < 48;
+        }}
+      >
+        {hasMore ? (
+          <li className="pb-2 text-center">
+            <button
+              type="button"
+              className="text-xs text-violet-300 hover:text-violet-200 disabled:opacity-50"
+              disabled={loadingEarlier}
+              onClick={() => void loadEarlier()}
+            >
+              {loadingEarlier ? "Loading..." : "Load earlier messages"}
+            </button>
+          </li>
+        ) : null}
         {messagesQuery.isLoading ? (
           <li className="text-sm text-slate-500">Loading messages...</li>
         ) : null}
@@ -142,28 +217,33 @@ export function ChatPanel({ roomSlug, enabled = true, giphyApiKey }: ChatPanelPr
               : "Could not load messages"}
           </li>
         ) : null}
-        {messagesQuery.data?.messages.map((message) => (
+        {allMessages.map((message) => (
           <MessageBubble key={message.id} message={message} />
         ))}
       </ul>
 
-      <div className="border-t border-slate-800 p-4">
+      <div className="border-t border-slate-800 p-3">
         {showEmojis ? (
-          <div className="mb-3 flex flex-wrap gap-2">
-            {QUICK_EMOJIS.map((emoji) => (
-              <button
-                key={emoji}
-                type="button"
-                className="rounded-md bg-slate-800 px-2 py-1 text-lg hover:bg-slate-700"
-                onClick={() => setDraft((value) => `${value}${emoji}`)}
-              >
-                {emoji}
-              </button>
-            ))}
+          <div className="mb-3 overflow-hidden rounded-lg border border-slate-700">
+            <Suspense
+              fallback={<p className="p-3 text-center text-xs text-slate-500">Loading emojis...</p>}
+            >
+              <EmojiPicker
+                width="100%"
+                height={compact ? 280 : 320}
+                theme={Theme.DARK}
+                searchPlaceHolder="Search emoji"
+                previewConfig={{ showPreview: false }}
+                onEmojiClick={(emojiData) => {
+                  setDraft((value) => `${value}${emojiData.emoji}`);
+                  setShowEmojis(false);
+                }}
+              />
+            </Suspense>
           </div>
         ) : null}
 
-        {giphyApiKey ? (
+        {showGiphy && giphyApiKey ? (
           <div className="mb-3 space-y-2">
             <div className="flex gap-2">
               <Input
@@ -178,11 +258,11 @@ export function ChatPanel({ roomSlug, enabled = true, giphyApiKey }: ChatPanelPr
                 }}
               />
               <Button variant="secondary" onClick={() => void searchGifs()}>
-                GIF
+                Search
               </Button>
             </div>
             {gifResults.length > 0 ? (
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid max-h-40 grid-cols-3 gap-2 overflow-y-auto">
                 {gifResults.map((gif) => (
                   <button
                     key={gif.url}
@@ -203,10 +283,27 @@ export function ChatPanel({ roomSlug, enabled = true, giphyApiKey }: ChatPanelPr
           <button
             type="button"
             className="rounded-lg border border-slate-700 px-3 text-sm text-slate-300 hover:bg-slate-800"
-            onClick={() => setShowEmojis((value) => !value)}
+            onClick={() => {
+              setShowEmojis((value) => !value);
+              setShowGiphy(false);
+            }}
+            aria-label="Emoji picker"
           >
             🙂
           </button>
+          {giphyApiKey ? (
+            <button
+              type="button"
+              className="rounded-lg border border-slate-700 px-3 text-sm text-slate-300 hover:bg-slate-800"
+              onClick={() => {
+                setShowGiphy((value) => !value);
+                setShowEmojis(false);
+              }}
+              aria-label="GIF search"
+            >
+              GIF
+            </button>
+          ) : null}
           <Input
             value={draft}
             onChange={(event) => setDraft(event.target.value)}
