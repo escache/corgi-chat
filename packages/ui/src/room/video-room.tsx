@@ -4,7 +4,6 @@ import { LiveKitRoom, RoomAudioRenderer, useRoomContext } from "@livekit/compone
 import { RoomEvent } from "livekit-client";
 import { useEffect, useRef, useState } from "react";
 
-import { Card } from "../components/card";
 import { LiveParticipantSidebar } from "./participant-sidebar";
 import { useStopScreenShareOnLeave, VideoControls } from "./video-controls";
 import { PinnedLayout, VideoGrid } from "./video-layout";
@@ -109,19 +108,7 @@ export function VideoRoom({ token, serverUrl, onLeave, joinSoundSrc, leaveSoundS
   );
 }
 
+/** @deprecated Use ChatPanel from @corgi-chat/ui/chat — kept for temporary compatibility. */
 export function ChatPlaceholder() {
-  return (
-    <Card className="flex min-h-[360px] flex-col p-4">
-      <h2 className="text-lg font-semibold">Chat</h2>
-      <p className="mt-2 text-sm text-slate-400">
-        Text chat is the heart of corgi-chat. Persistent messages arrive in Phase 3 — for now this
-        is your room&apos;s main space.
-      </p>
-      <div className="mt-4 flex flex-1 flex-col justify-end">
-        <div className="rounded-lg border border-dashed border-slate-700 bg-slate-900/40 p-4 text-center text-sm text-slate-500">
-          Message input coming soon
-        </div>
-      </div>
-    </Card>
-  );
+  return null;
 }
