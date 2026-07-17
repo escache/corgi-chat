@@ -7,7 +7,8 @@
     ".": "./src/index.ts",
     "./lobby": "./src/lobby/index.ts",
     "./room": "./src/room/index.ts",
-    "./chat": "./src/chat/index.ts"
+    "./chat": "./src/chat/index.ts",
+    "./activities": "./src/activities/index.ts"
   },
   "scripts": {
     "build": "tsc",
@@ -20,6 +21,7 @@
     "clsx": "^2.1.1",
     "emoji-picker-react": "^4.12.2",
     "livekit-client": "^2.13.3",
+    "react-youtube": "^10.1.0",
     "tailwind-merge": "^3.3.0"
   },
   "peerDependencies": {

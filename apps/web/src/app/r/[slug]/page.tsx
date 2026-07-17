@@ -149,6 +149,14 @@ export default function RoomPage() {
               token={tokenQuery.data.token}
               serverUrl={tokenQuery.data.serverUrl}
               onLeave={() => setView("lobby")}
+              userId={currentUserId}
+              isHost={
+                Boolean(currentUserId) &&
+                (roomQuery.data.hostId === currentUserId ||
+                  roomQuery.data.members.some(
+                    (member) => member.id === currentUserId && member.role === "host",
+                  ))
+              }
             />
             {showCallChat ? (
               <ChatPanel

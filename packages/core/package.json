@@ -7,7 +7,8 @@
     ".": "./src/index.ts",
     "./rooms": "./src/rooms/index.ts",
     "./livekit": "./src/livekit/index.ts",
-    "./chat": "./src/chat/index.ts"
+    "./chat": "./src/chat/index.ts",
+    "./activities": "./src/activities/index.ts"
   },
   "scripts": {
     "build": "tsc",
