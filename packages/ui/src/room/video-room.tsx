@@ -8,7 +8,9 @@ import { useEffect, useRef, useState } from "react";
 import { ActivityChooserModal } from "../activities/activity-chooser-modal";
 import { ActivityPane } from "../activities/activity-pane";
 import { DraggableSplit } from "../activities/draggable-split";
+import { MediaSettingsModal } from "./media-settings-modal";
 import { LiveParticipantSidebar } from "./participant-sidebar";
+import { ReactionOverlay, useVideoReactions } from "./reactions";
 import { useStopScreenShareOnLeave, VideoControls } from "./video-controls";
 import { PinnedLayout, VideoGrid } from "./video-layout";
 
@@ -33,11 +35,13 @@ function VideoRoomInner({
 }: Omit<VideoRoomProps, "token" | "serverUrl">) {
   const [layout, setLayout] = useState<"grid" | "pinned">("grid");
   const [chooserOpen, setChooserOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [activeActivityId, setActiveActivityId] = useState<ActivityId | null>(null);
   const stopMedia = useStopScreenShareOnLeave();
   const joinAudioRef = useRef<HTMLAudioElement | null>(null);
   const leaveAudioRef = useRef<HTMLAudioElement | null>(null);
   const room = useRoomContext();
+  const { reactions, sendReaction } = useVideoReactions(userId);
 
   useEffect(() => {
     joinAudioRef.current = new Audio(joinSoundSrc);
@@ -67,8 +71,9 @@ function VideoRoomInner({
   };
 
   const videoPane = (
-    <div className="h-full min-h-[240px] overflow-hidden rounded-lg bg-black">
+    <div className="relative h-full min-h-[240px] overflow-hidden rounded-lg bg-black">
       {layout === "grid" ? <VideoGrid /> : <PinnedLayout />}
+      <ReactionOverlay reactions={reactions} />
     </div>
   );
 
@@ -122,7 +127,11 @@ function VideoRoomInner({
         <LiveParticipantSidebar />
       </div>
 
-      <VideoControls onLeave={handleLeave} />
+      <VideoControls
+        onLeave={handleLeave}
+        onOpenSettings={() => setSettingsOpen(true)}
+        onSendReaction={sendReaction}
+      />
       <RoomAudioRenderer />
 
       <ActivityChooserModal
@@ -134,6 +143,7 @@ function VideoRoomInner({
           setChooserOpen(false);
         }}
       />
+      <MediaSettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)} />
     </div>
   );
 }

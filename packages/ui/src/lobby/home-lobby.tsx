@@ -31,7 +31,8 @@ export function HomeLobby({
   return (
     <div className="min-h-screen bg-slate-950 text-white">
       <div className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(124,58,237,0.25),_transparent_55%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(56,189,248,0.18),_transparent_50%),radial-gradient(ellipse_at_bottom_right,_rgba(244,114,182,0.14),_transparent_45%),linear-gradient(180deg,#020617_0%,#0f172a_100%)]" />
+        <div className="absolute inset-0 opacity-40 [background-image:radial-gradient(rgba(148,163,184,0.15)_1px,transparent_1px)] [background-size:24px_24px]" />
         <div className="relative mx-auto flex min-h-screen max-w-6xl flex-col px-6 py-8">
           <header className="flex items-center justify-between">
             <div className="text-lg font-semibold tracking-tight">corgi chat</div>
@@ -48,8 +49,8 @@ export function HomeLobby({
                 Free and secure video hangouts for everyone.
               </h1>
               <p className="max-w-xl text-lg text-slate-300">
-                Create a room, invite friends, and hang out. Video calls arrive in the next
-                phase — today we&apos;re building the lobby.
+                Create a room, invite friends, and hang out with chat, optional video, and
+                collaborative activities.
               </p>
             </div>
 

@@ -74,9 +74,14 @@ pnpm dev
 | `pnpm lint` | Lint all packages |
 | `pnpm typecheck` | Typecheck all packages |
 | `pnpm test` | Run unit tests |
+| `pnpm --filter @corgi-chat/web test:e2e` | Playwright e2e (home smoke) |
 | `pnpm db:push` | Push Drizzle schema to Postgres |
 | `pnpm setup:clerk` | Install Clerk CLI, link app, pull keys |
 | `pnpm legacy:start` | Start legacy CRA + Socket.IO (deprecated) |
+
+## Deploy
+
+See `docs/migration/reference/cutover-checklist.md` and root `vercel.json`.
 
 ## Migration status
 
@@ -87,7 +92,7 @@ pnpm dev
 | 2 LiveKit video | Complete |
 | 3 Persistent chat | Complete |
 | 4 Activities | Complete |
-| 5 Cutover | Pending |
+| 5 Cutover | In progress (polish; legacy delete deferred) |
 | 6 Desktop (Tauri) | Pending |
 
 See `docs/migration/` for agent prompts to continue the migration.

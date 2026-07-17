@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "tsc --noEmit",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.22.0",
@@ -16,6 +17,7 @@
     "@corgi-chat/db": "workspace:*",
     "@corgi-chat/ui": "workspace:*",
     "@livekit/components-styles": "^1.1.5",
+    "@sentry/nextjs": "^9.22.0",
     "@supabase/supabase-js": "^2.49.8",
     "@tanstack/react-query": "^5.80.7",
     "drizzle-orm": "^0.44.2",
@@ -27,6 +29,7 @@
   },
   "devDependencies": {
     "@corgi-chat/config": "workspace:*",
+    "@playwright/test": "^1.52.0",
     "@types/node": "^22.15.21",
     "@types/react": "^19.1.6",
     "@types/react-dom": "^19.1.5",

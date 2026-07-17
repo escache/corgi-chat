@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 
 import { Button } from "../components/button";
-import { Card } from "../components/card";
+import { PermissionsAlert } from "./permissions-alert";
 
 export interface CallPreviewProps {
   displayName: string;
@@ -22,7 +22,8 @@ export function CallPreview({
 }: CallPreviewProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [stream, setStream] = useState<MediaStream | null>(null);
-  const [permissionError, setPermissionError] = useState<string | null>(null);
+  const [permissionBlocked, setPermissionBlocked] = useState(false);
+  const [retryToken, setRetryToken] = useState(0);
 
   useEffect(() => {
     let active = true;
@@ -37,19 +38,21 @@ export function CallPreview({
         }
         mediaStream = result;
         setStream(result);
+        setPermissionBlocked(false);
         if (videoRef.current) {
           videoRef.current.srcObject = result;
         }
       })
       .catch(() => {
-        setPermissionError("Camera or microphone permission denied. You can still join muted.");
+        setPermissionBlocked(true);
+        setStream(null);
       });
 
     return () => {
       active = false;
       mediaStream?.getTracks().forEach((track) => track.stop());
     };
-  }, []);
+  }, [retryToken]);
 
   return (
     <div className="flex min-h-[420px] flex-col gap-4">
@@ -63,7 +66,7 @@ export function CallPreview({
         />
         {!stream ? (
           <div className="absolute inset-0 flex items-center justify-center text-slate-400">
-            {permissionError ?? "Starting camera..."}
+            {permissionBlocked ? "Permissions needed" : "Starting camera..."}
           </div>
         ) : null}
       </div>
@@ -83,6 +86,15 @@ export function CallPreview({
           Back to room
         </Button>
       </div>
+
+      <PermissionsAlert
+        open={permissionBlocked}
+        onClose={() => setPermissionBlocked(false)}
+        onRetry={() => {
+          setPermissionBlocked(false);
+          setRetryToken((value) => value + 1);
+        }}
+      />
     </div>
   );
 }
