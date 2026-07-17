@@ -4,3 +4,8 @@ export * from "./rooms/slug";
 export * from "./rooms/types";
 export * from "./livekit/api";
 export * from "./livekit/hooks";
+export * from "./chat/api";
+export * from "./chat/hooks";
+export * from "./chat/types";
+export * from "./activities/types";
+export * from "./activities/registry";

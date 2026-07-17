@@ -16,6 +16,7 @@
     "@corgi-chat/db": "workspace:*",
     "@corgi-chat/ui": "workspace:*",
     "@livekit/components-styles": "^1.1.5",
+    "@supabase/supabase-js": "^2.49.8",
     "@tanstack/react-query": "^5.80.7",
     "drizzle-orm": "^0.44.2",
     "livekit-server-sdk": "^2.13.0",
