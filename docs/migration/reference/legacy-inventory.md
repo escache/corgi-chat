@@ -35,20 +35,25 @@ Map legacy components to migration phases. Agents should **port UI/UX**, not net
 
 ## Feature parity checklist
 
-- [ ] Create room from home page
-- [ ] Join room by slug URL
-- [ ] Pre-join preview (camera/mic)
-- [ ] Tiled video layout
-- [ ] Pinned speaker layout
-- [ ] Mute / camera toggle
-- [ ] Screen share
-- [ ] Sidebar participant list
-- [ ] Text chat with history
-- [ ] GIF search (Giphy)
-- [ ] Emoji picker
-- [ ] Draw activity sync
-- [ ] YouTube sync activity
-- [ ] Twitch / iframe activities
-- [ ] Join/leave sounds
-- [ ] Keyboard shortcuts
-- [ ] Host/admin controls
+- [x] Create room from home page
+- [x] Join room by slug URL
+- [x] Pre-join preview (camera/mic)
+- [x] Tiled video layout
+- [x] Pinned speaker layout
+- [x] Mute / camera toggle
+- [x] Screen share
+- [x] Sidebar participant list
+- [x] Text chat with history
+- [x] GIF search (Giphy)
+- [x] Emoji picker
+- [x] Draw activity sync
+- [x] YouTube sync activity
+- [x] Twitch / iframe activities
+- [x] Join/leave sounds
+- [x] Keyboard shortcuts
+- [x] Host/admin controls
+- [x] Media settings modal (device prefs)
+- [x] Permissions alert
+- [x] Emoji reactions on video (data channel)
+- [ ] Legacy Unsplash background photos (deferred — CSS atmosphere used instead)
+- [ ] Delete `legacy/` tree (deferred until production cutover sign-off)

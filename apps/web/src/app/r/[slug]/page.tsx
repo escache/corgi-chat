@@ -1,9 +1,11 @@
 "use client";
 
 import { useJoinRoom, useLiveKitToken, useRoom } from "@corgi-chat/core";
-import { CallPreview, RoomLobby, VideoRoom } from "@corgi-chat/ui";
+import { CallPreview, ChatPanel, RoomLobby, VideoRoom } from "@corgi-chat/ui";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
+
+import { useSupabaseMessageRealtime } from "@/hooks/use-supabase-message-realtime";
 
 import "@livekit/components-styles";
 
@@ -19,8 +21,16 @@ export default function RoomPage() {
   const [displayName, setDisplayName] = useState("Guest");
   const [error, setError] = useState<string | null>(null);
   const [livekitConfigured, setLivekitConfigured] = useState(true);
+  const [showCallChat, setShowCallChat] = useState(true);
 
   const tokenQuery = useLiveKitToken(slug, view === "call");
+  const chatEnabled =
+    Boolean(currentUserId) && (view === "lobby" || view === "call");
+
+  useSupabaseMessageRealtime(slug, {
+    enabled: chatEnabled,
+    roomId: roomQuery.data?.id,
+  });
 
   useEffect(() => {
     void fetch("/api/me")
@@ -111,23 +121,52 @@ export default function RoomPage() {
     }
 
     return (
-      <div className="min-h-screen bg-slate-950 px-6 py-8 text-white">
-        <div className="mx-auto flex max-w-6xl flex-col gap-4">
-          <div className="flex items-center justify-between">
+      <div className="min-h-screen bg-slate-950 px-4 py-6 text-white lg:px-6">
+        <div className="mx-auto flex h-[calc(100vh-3rem)] max-w-7xl flex-col gap-4">
+          <div className="flex items-center justify-between gap-3">
             <h1 className="text-xl font-semibold">{roomQuery.data.name}</h1>
-            <button
-              type="button"
-              className="text-sm text-slate-400 hover:text-white"
-              onClick={() => setView("lobby")}
-            >
-              ← Back to chat
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                className="rounded-md border border-slate-700 px-3 py-1.5 text-sm text-slate-300 hover:bg-slate-800"
+                onClick={() => setShowCallChat((value) => !value)}
+              >
+                {showCallChat ? "Hide chat" : "Show chat"}
+              </button>
+              <button
+                type="button"
+                className="text-sm text-slate-400 hover:text-white"
+                onClick={() => setView("lobby")}
+              >
+                ← Back to lobby
+              </button>
+            </div>
           </div>
-          <VideoRoom
-            token={tokenQuery.data.token}
-            serverUrl={tokenQuery.data.serverUrl}
-            onLeave={() => setView("lobby")}
-          />
+          <div
+            className={`grid min-h-0 flex-1 gap-4 ${showCallChat ? "lg:grid-cols-[minmax(0,1fr)_340px]" : ""}`}
+          >
+            <VideoRoom
+              token={tokenQuery.data.token}
+              serverUrl={tokenQuery.data.serverUrl}
+              onLeave={() => setView("lobby")}
+              userId={currentUserId}
+              isHost={
+                Boolean(currentUserId) &&
+                (roomQuery.data.hostId === currentUserId ||
+                  roomQuery.data.members.some(
+                    (member) => member.id === currentUserId && member.role === "host",
+                  ))
+              }
+            />
+            {showCallChat ? (
+              <ChatPanel
+                roomSlug={slug}
+                enabled
+                compact
+                giphyApiKey={process.env.NEXT_PUBLIC_GIPHY_API_KEY}
+              />
+            ) : null}
+          </div>
         </div>
       </div>
     );
@@ -140,6 +179,7 @@ export default function RoomPage() {
       livekitConfigured={livekitConfigured}
       isJoining={joinRoom.isPending}
       error={error}
+      giphyApiKey={process.env.NEXT_PUBLIC_GIPHY_API_KEY}
       onStartVideo={() => setView("preview")}
       onJoinLobby={async () => {
         setError(null);

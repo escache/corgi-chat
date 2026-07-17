@@ -3,6 +3,7 @@ import { and, eq } from "drizzle-orm";
 import { generateRoomSlug, isValidRoomSlug } from "@corgi-chat/core";
 import {
   getDb,
+  messages,
   roomMembers,
   rooms,
   users,
@@ -130,6 +131,14 @@ export async function joinRoomBySlug(slug: string, user: User, role: MemberRole 
       roomId: room.id,
       userId: user.id,
       role: user.id === room.hostId ? "host" : role,
+    });
+
+    await db.insert(messages).values({
+      roomId: room.id,
+      userId: null,
+      body: `${user.displayName} joined the room`,
+      type: "system",
+      metadataJson: {},
     });
   }
 
