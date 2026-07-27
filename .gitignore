@@ -12,6 +12,16 @@ coverage
 build
 dist
 
+# turbo
+.turbo
+**/.turbo
+
+# next
+apps/web/.next
+apps/web/test-results
+apps/web/playwright-report
+**/.next
+
 # misc
 .DS_Store
 .env.local

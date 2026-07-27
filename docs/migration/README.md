@@ -27,11 +27,13 @@ Step-by-step prompts for migrating `corgi-chat` from the legacy stack (CRA, mesh
 - **Phase 6** can start after **Phase 2** completes (desktop needs video, not chat/activities).
 - Phases 3 and 4 can overlap with Phase 6 if different agents own different workstreams.
 
-## Supporting files
+- Supporting files
 
 - [templates/phase-prompt-template.md](templates/phase-prompt-template.md) — template for writing new phase prompts
 - [reference/target-architecture.md](reference/target-architecture.md) — stack decisions and monorepo layout
 - [reference/legacy-inventory.md](reference/legacy-inventory.md) — what to port vs retire from `packages/client`
+- [reference/activity-data-channel.md](reference/activity-data-channel.md) — LiveKit activity message schema
+- [reference/cutover-checklist.md](reference/cutover-checklist.md) — production deploy / DNS cutover steps
 
 ## Conventions for all agents
 

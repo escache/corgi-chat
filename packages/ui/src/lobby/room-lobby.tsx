@@ -4,7 +4,7 @@ import type { RoomDetails } from "@corgi-chat/core";
 
 import { Button } from "../components/button";
 import { Card } from "../components/card";
-import { ChatPlaceholder } from "../room/video-room";
+import { ChatPanel } from "../chat/chat-panel";
 
 export interface RoomLobbyProps {
   room: RoomDetails;
@@ -14,6 +14,7 @@ export interface RoomLobbyProps {
   isJoining?: boolean;
   error?: string | null;
   livekitConfigured?: boolean;
+  giphyApiKey?: string;
 }
 
 export function RoomLobby({
@@ -24,6 +25,7 @@ export function RoomLobby({
   isJoining = false,
   error,
   livekitConfigured = true,
+  giphyApiKey,
 }: RoomLobbyProps) {
   const isMember = room.members.some((member) => member.id === currentUserId);
 
@@ -56,7 +58,7 @@ export function RoomLobby({
           </Card>
         ) : (
           <div className="grid flex-1 gap-6 lg:grid-cols-[2fr_1fr]">
-            <ChatPlaceholder />
+            <ChatPanel roomSlug={room.slug} enabled giphyApiKey={giphyApiKey} />
 
             <Card>
               <h2 className="text-lg font-semibold">In room ({room.members.length})</h2>
