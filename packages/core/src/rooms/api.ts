@@ -1,3 +1,5 @@
+import { apiUrl } from "../api-url";
+
 import type {
   CreateRoomInput,
   JoinRoomResponse,
@@ -14,7 +16,7 @@ async function parseJson<T>(response: Response): Promise<T> {
 }
 
 export async function createRoom(input: CreateRoomInput): Promise<RoomSummary> {
-  const response = await fetch("/api/rooms", {
+  const response = await fetch(apiUrl("/api/rooms"), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(input),
@@ -23,12 +25,12 @@ export async function createRoom(input: CreateRoomInput): Promise<RoomSummary> {
 }
 
 export async function fetchRoom(slug: string): Promise<RoomDetails> {
-  const response = await fetch(`/api/rooms/${slug}`);
+  const response = await fetch(apiUrl(`/api/rooms/${slug}`));
   return parseJson<RoomDetails>(response);
 }
 
 export async function joinRoom(slug: string, displayName?: string): Promise<JoinRoomResponse> {
-  const response = await fetch(`/api/rooms/${slug}/join`, {
+  const response = await fetch(apiUrl(`/api/rooms/${slug}/join`), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ displayName }),
@@ -37,7 +39,7 @@ export async function joinRoom(slug: string, displayName?: string): Promise<Join
 }
 
 export async function createGuestSession(displayName: string): Promise<{ guestToken: string }> {
-  const response = await fetch("/api/guest", {
+  const response = await fetch(apiUrl("/api/guest"), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ displayName }),

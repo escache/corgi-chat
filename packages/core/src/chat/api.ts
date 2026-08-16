@@ -1,3 +1,5 @@
+import { apiUrl } from "../api-url";
+
 import type { ChatMessage, MessagesPage, SendMessageInput } from "./types";
 
 async function parseJson<T>(response: Response): Promise<T> {
@@ -21,12 +23,12 @@ export async function fetchMessages(
   }
 
   const query = params.toString();
-  const response = await fetch(`/api/rooms/${slug}/messages${query ? `?${query}` : ""}`);
+  const response = await fetch(apiUrl(`/api/rooms/${slug}/messages${query ? `?${query}` : ""}`));
   return parseJson<MessagesPage>(response);
 }
 
 export async function sendMessage(slug: string, input: SendMessageInput): Promise<ChatMessage> {
-  const response = await fetch(`/api/rooms/${slug}/messages`, {
+  const response = await fetch(apiUrl(`/api/rooms/${slug}/messages`), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(input),
