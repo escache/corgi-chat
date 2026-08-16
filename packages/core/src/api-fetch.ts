@@ -12,8 +12,10 @@ export function apiFetch(input: string, init?: RequestInit): Promise<Response> {
     throw new Error("apiFetch must be used in the browser");
   }
 
-  const current = new URL(window.location.href);
-  const url = `${current.protocol}//${current.host}${input}`;
+  const current = new URL(document.URL);
+  const url = new URL(input, current.href);
+  url.username = "";
+  url.password = "";
 
   const headers = new Headers(init?.headers);
   if (current.username || current.password) {
@@ -21,5 +23,5 @@ export function apiFetch(input: string, init?: RequestInit): Promise<Response> {
     headers.set("Authorization", `Basic ${base64(credentials)}`);
   }
 
-  return fetch(url, { ...init, headers });
+  return fetch(url.toString(), { ...init, headers });
 }
