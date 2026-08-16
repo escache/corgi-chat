@@ -3,7 +3,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { createRoom, fetchRoom, joinRoom } from "./api";
-import type { CreateRoomInput } from "./types";
+import type { CreateRoomInput, RoomDetails } from "./types";
 
 export function roomQueryKey(slug: string) {
   return ["room", slug] as const;
@@ -24,7 +24,10 @@ export function useCreateRoom() {
   return useMutation({
     mutationFn: (input: CreateRoomInput) => createRoom(input),
     onSuccess: (room) => {
-      queryClient.setQueryData(roomQueryKey(room.slug), room);
+      queryClient.setQueryData<RoomDetails>(roomQueryKey(room.slug), {
+        ...room,
+        members: [],
+      });
     },
   });
 }
