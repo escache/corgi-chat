@@ -1,8 +1,8 @@
 "use client";
 
 import { apiFetch, useJoinRoom, useLiveKitToken, useRoom } from "@corgi-chat/core";
-import { CallPreview, ChatPanel, RoomLobby, VideoRoom } from "@corgi-chat/ui";
-import { useParams } from "next/navigation";
+import { Button, CallPreview, ChatPanel, RoomLobby, VideoRoom } from "@corgi-chat/ui";
+import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { useSupabaseMessageRealtime } from "@/hooks/use-supabase-message-realtime";
@@ -13,6 +13,7 @@ type RoomView = "lobby" | "preview" | "call";
 
 export default function RoomPage() {
   const params = useParams<{ slug: string }>();
+  const router = useRouter();
   const slug = params.slug;
   const roomQuery = useRoom(slug);
   const joinRoom = useJoinRoom(slug);
@@ -124,7 +125,12 @@ export default function RoomPage() {
       <div className="min-h-screen bg-slate-950 px-4 py-6 text-white lg:px-6">
         <div className="mx-auto flex h-[calc(100vh-3rem)] max-w-7xl flex-col gap-4">
           <div className="flex items-center justify-between gap-3">
-            <h1 className="text-xl font-semibold">{roomQuery.data.name}</h1>
+            <div className="flex items-center gap-3">
+              <Button variant="ghost" size="sm" onClick={() => router.push("/")}>
+                ← Home
+              </Button>
+              <h1 className="text-xl font-semibold">{roomQuery.data.name}</h1>
+            </div>
             <div className="flex items-center gap-3">
               <button
                 type="button"
@@ -140,6 +146,9 @@ export default function RoomPage() {
               >
                 ← Back to lobby
               </button>
+              <Button variant="ghost" size="sm" onClick={() => router.push("/")}>
+                Leave room
+              </Button>
             </div>
           </div>
           <div
@@ -180,6 +189,8 @@ export default function RoomPage() {
       isJoining={joinRoom.isPending}
       error={error}
       giphyApiKey={process.env.NEXT_PUBLIC_GIPHY_API_KEY}
+      onHome={() => router.push("/")}
+      onLeaveRoom={() => router.push("/")}
       onStartVideo={() => setView("preview")}
       onJoinLobby={async () => {
         setError(null);
