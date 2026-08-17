@@ -21,6 +21,7 @@ export function HomePageWithClerk() {
       isSignedIn={Boolean(isSignedIn) || guestReady}
       userName={user?.fullName ?? user?.username}
       authHeader={<AuthHeader clerkEnabled />}
+      onHome={() => router.push("/")}
       onContinueAsGuest={async (displayName) => {
         setError(null);
         const response = await fetch("/api/guest", {

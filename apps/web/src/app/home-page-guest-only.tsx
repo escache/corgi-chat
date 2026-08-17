@@ -17,6 +17,7 @@ export function HomePageGuestOnly() {
     <HomeLobby
       isSignedIn={guestReady}
       authHeader={<AuthHeader clerkEnabled={false} />}
+      onHome={() => router.push("/")}
       onContinueAsGuest={async (displayName) => {
         setError(null);
         const response = await fetch("/api/guest", {
