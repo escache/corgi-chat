@@ -12,6 +12,7 @@ export interface HomeLobbyProps {
   authHeader?: ReactNode;
   onContinueAsGuest: (displayName: string) => Promise<void>;
   onCreateRoom: (name: string) => Promise<void>;
+  onHome?: () => void;
   isCreating?: boolean;
   error?: string | null;
 }
@@ -22,6 +23,7 @@ export function HomeLobby({
   authHeader,
   onContinueAsGuest,
   onCreateRoom,
+  onHome,
   isCreating = false,
   error,
 }: HomeLobbyProps) {
@@ -35,7 +37,17 @@ export function HomeLobby({
         <div className="absolute inset-0 opacity-40 [background-image:radial-gradient(rgba(148,163,184,0.15)_1px,transparent_1px)] [background-size:24px_24px]" />
         <div className="relative mx-auto flex min-h-screen max-w-6xl flex-col px-6 py-8">
           <header className="flex items-center justify-between">
-            <div className="text-lg font-semibold tracking-tight">corgi chat</div>
+            {onHome ? (
+              <button
+                type="button"
+                onClick={onHome}
+                className="text-lg font-semibold tracking-tight text-white transition-colors hover:text-violet-300"
+              >
+                corgi chat
+              </button>
+            ) : (
+              <div className="text-lg font-semibold tracking-tight">corgi chat</div>
+            )}
             {authHeader ?? (
               isSignedIn ? (
                 <div className="text-sm text-slate-300">Signed in as {userName}</div>
