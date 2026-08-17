@@ -1,7 +1,7 @@
 "use client";
 
 import { useAuth, useUser } from "@clerk/nextjs";
-import { useCreateRoom } from "@corgi-chat/core";
+import { apiUrl, useCreateRoom } from "@corgi-chat/core";
 import { HomeLobby } from "@corgi-chat/ui";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -24,7 +24,7 @@ export function HomePageWithClerk() {
       onHome={() => router.push("/")}
       onContinueAsGuest={async (displayName) => {
         setError(null);
-        const response = await fetch("/api/guest", {
+        const response = await fetch(apiUrl("/api/guest"), {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ displayName }),
