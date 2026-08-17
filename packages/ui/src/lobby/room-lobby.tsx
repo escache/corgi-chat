@@ -1,6 +1,7 @@
 "use client";
 
 import type { RoomDetails } from "@corgi-chat/core";
+import { useState } from "react";
 
 import { Button } from "../components/button";
 import { Card } from "../components/card";
@@ -11,6 +12,9 @@ export interface RoomLobbyProps {
   currentUserId?: string;
   onJoinLobby: () => Promise<void>;
   onStartVideo?: () => void;
+  onHome?: () => void;
+  onLeaveRoom?: () => void;
+  onCopyInvite?: () => void;
   isJoining?: boolean;
   error?: string | null;
   livekitConfigured?: boolean;
@@ -22,27 +26,63 @@ export function RoomLobby({
   currentUserId,
   onJoinLobby,
   onStartVideo,
+  onHome,
+  onLeaveRoom,
+  onCopyInvite,
   isJoining = false,
   error,
   livekitConfigured = true,
   giphyApiKey,
 }: RoomLobbyProps) {
+  const [copied, setCopied] = useState(false);
   const isMember = room.members.some((member) => member.id === currentUserId);
+
+  const handleCopyInvite = async () => {
+    try {
+      await navigator.clipboard.writeText(`${window.location.origin}/r/${room.slug}`);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // ignore clipboard errors
+    }
+    onCopyInvite?.();
+  };
 
   return (
     <div className="min-h-screen bg-slate-950 text-white">
       <div className="mx-auto flex min-h-screen max-w-6xl flex-col px-6 py-8">
         <header className="mb-6 flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <p className="text-sm text-violet-300">Room</p>
-            <h1 className="text-3xl font-bold">{room.name}</h1>
-            <p className="mt-1 text-slate-400">/{room.slug}</p>
+          <div className="flex items-center gap-3">
+            {onHome ? (
+              <Button variant="ghost" size="sm" onClick={onHome}>
+                ← Home
+              </Button>
+            ) : null}
+            <div>
+              <p className="text-sm text-violet-300">Room</p>
+              <h1 className="text-3xl font-bold">{room.name}</h1>
+              <p className="mt-1 text-slate-400">/{room.slug}</p>
+            </div>
           </div>
-          {isMember && livekitConfigured && onStartVideo ? (
-            <Button variant="secondary" onClick={onStartVideo}>
-              Start video call
-            </Button>
-          ) : null}
+          <div className="flex flex-wrap items-center gap-2">
+            {isMember ? (
+              <>
+                <Button variant="secondary" size="sm" onClick={handleCopyInvite}>
+                  {copied ? "Copied!" : "Copy invite link"}
+                </Button>
+                {onLeaveRoom ? (
+                  <Button variant="ghost" size="sm" onClick={onLeaveRoom}>
+                    Leave room
+                  </Button>
+                ) : null}
+              </>
+            ) : null}
+            {isMember && livekitConfigured && onStartVideo ? (
+              <Button variant="secondary" onClick={onStartVideo}>
+                Start video call
+              </Button>
+            ) : null}
+          </div>
         </header>
 
         {!isMember ? (
