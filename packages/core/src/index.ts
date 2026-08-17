@@ -1,3 +1,4 @@
+export { apiFetch } from "./api-fetch";
 export * from "./rooms/api";
 export * from "./rooms/hooks";
 export * from "./rooms/slug";

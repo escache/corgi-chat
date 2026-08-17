@@ -1,6 +1,6 @@
 "use client";
 
-import { useJoinRoom, useLiveKitToken, useRoom } from "@corgi-chat/core";
+import { apiFetch, useJoinRoom, useLiveKitToken, useRoom } from "@corgi-chat/core";
 import { Button, CallPreview, ChatPanel, RoomLobby, VideoRoom } from "@corgi-chat/ui";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -34,7 +34,7 @@ export default function RoomPage() {
   });
 
   useEffect(() => {
-    void fetch("/api/me")
+    void apiFetch("/api/me")
       .then((response) => (response.ok ? response.json() : null))
       .then((body: { userId?: string; displayName?: string } | null) => {
         if (body?.userId) {

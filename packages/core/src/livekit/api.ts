@@ -1,3 +1,5 @@
+import { apiFetch } from "../api-fetch";
+
 export function livekitRoomName(slug: string): string {
   return `corgi-${slug}`;
 }
@@ -9,7 +11,7 @@ export interface LiveKitTokenResponse {
 }
 
 export async function fetchLiveKitToken(roomSlug: string): Promise<LiveKitTokenResponse> {
-  const response = await fetch("/api/livekit/token", {
+  const response = await apiFetch("/api/livekit/token", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ roomSlug }),
