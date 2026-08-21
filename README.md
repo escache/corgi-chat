@@ -8,6 +8,7 @@ This repo is migrating from the legacy CRA + mesh WebRTC stack to a modern Turbo
 
 ```
 apps/web/          Next.js 15 app (new)
+apps/desktop/      Tauri 2 + Vite desktop client (new)
 legacy/client/     Legacy CRA frontend (frozen)
 legacy/server/     Legacy Socket.IO server (frozen)
 packages/ui/       Shared UI components
@@ -20,6 +21,7 @@ docs/migration/    Step-by-step agent migration prompts
 
 - Node.js 22+
 - pnpm 9+
+- Rust + Cargo (for desktop builds)
 - Supabase project (Postgres `DATABASE_URL`)
 - Clerk application
 
@@ -78,6 +80,41 @@ pnpm dev
 | `pnpm db:push` | Push Drizzle schema to Postgres |
 | `pnpm setup:clerk` | Install Clerk CLI, link app, pull keys |
 | `pnpm legacy:start` | Start legacy CRA + Socket.IO (deprecated) |
+| `pnpm desktop:dev` | Start Tauri desktop app in dev mode |
+| `pnpm desktop:build` | Build Tauri desktop installable artifact |
+| `pnpm desktop:preview` | Preview the built desktop frontend |
+
+## Desktop app
+
+The desktop client is in `apps/desktop/` and reuses `packages/ui` and `packages/core`.
+
+```bash
+# Install Rust + Tauri CLI if needed
+# https://tauri.app/start/prerequisites/
+cd apps/desktop
+pnpm install
+cp .env.example .env
+# Fill VITE_API_BASE_URL and VITE_SUPABASE_URL (see .env.example)
+pnpm desktop:dev
+```
+
+### Desktop authentication
+
+The desktop app supports the same **guest** flow as the web app: a display name creates a guest session and stores the returned token in memory. The `Authorization: Bearer <guestToken>` header is sent with every API request, so the desktop client can call the deployed web API across origins.
+
+For **Clerk**, the recommended Tauri approach is to authenticate the user in a system browser or an in-app webview, capture the Clerk session token from the OAuth callback (deep link `corgi-chat://callback?token=...`), and set it with `setAuthToken(token)`. This requires a small server endpoint to exchange or validate the token.
+
+### Desktop build
+
+```bash
+pnpm desktop:build
+```
+
+This builds the Vite frontend and the Tauri Rust binary. The first build downloads the Tauri CLI and compiles Rust, so it may take several minutes. To package an installable `.app`/`.msi`, set `bundle.active: true` in `apps/desktop/src-tauri/tauri.conf.json` and add icon files. Generate icons from a source PNG with:
+
+```bash
+pnpm --filter @corgi-chat/desktop tauri icon /path/to/icon.png
+```
 
 ## Deploy
 
@@ -93,7 +130,7 @@ See `docs/migration/reference/cutover-checklist.md` and root `vercel.json`.
 | 3 Persistent chat | Complete |
 | 4 Activities | Complete |
 | 5 Cutover | In progress (polish; legacy delete deferred) |
-| 6 Desktop (Tauri) | Pending |
+| 6 Desktop (Tauri) | In progress (scaffold; bundle/icons pending) |
 
 See `docs/migration/` for agent prompts to continue the migration.
 

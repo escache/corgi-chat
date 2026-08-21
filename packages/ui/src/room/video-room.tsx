@@ -59,9 +59,17 @@ function VideoRoomInner({
     room.on(RoomEvent.ParticipantConnected, onParticipantConnected);
     room.on(RoomEvent.ParticipantDisconnected, onParticipantDisconnected);
 
+    const onToggleMute = () => {
+      const local = room.localParticipant;
+      const enabled = !local.isMicrophoneEnabled;
+      void local.setMicrophoneEnabled(enabled).catch(() => undefined);
+    };
+    window.addEventListener("corgi:toggle-mute", onToggleMute);
+
     return () => {
       room.off(RoomEvent.ParticipantConnected, onParticipantConnected);
       room.off(RoomEvent.ParticipantDisconnected, onParticipantDisconnected);
+      window.removeEventListener("corgi:toggle-mute", onToggleMute);
     };
   }, [joinSoundSrc, leaveSoundSrc, room]);
 

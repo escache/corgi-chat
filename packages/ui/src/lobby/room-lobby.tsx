@@ -1,6 +1,7 @@
 "use client";
 
 import type { RoomDetails } from "@corgi-chat/core";
+import { usePlatform } from "@corgi-chat/core";
 import { useState } from "react";
 
 import { Button } from "../components/button";
@@ -36,10 +37,11 @@ export function RoomLobby({
 }: RoomLobbyProps) {
   const [copied, setCopied] = useState(false);
   const isMember = room.members.some((member) => member.id === currentUserId);
+  const platform = usePlatform();
 
   const handleCopyInvite = async () => {
     try {
-      await navigator.clipboard.writeText(`${window.location.origin}/r/${room.slug}`);
+      await navigator.clipboard.writeText(`${platform.getWebBaseUrl()}/r/${room.slug}`);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
@@ -98,7 +100,13 @@ export function RoomLobby({
           </Card>
         ) : (
           <div className="grid flex-1 gap-6 lg:grid-cols-[2fr_1fr]">
-            <ChatPanel roomSlug={room.slug} enabled giphyApiKey={giphyApiKey} />
+            <ChatPanel
+              roomSlug={room.slug}
+              enabled
+              giphyApiKey={giphyApiKey}
+              currentUserId={currentUserId}
+              roomName={room.name}
+            />
 
             <Card>
               <h2 className="text-lg font-semibold">In room ({room.members.length})</h2>

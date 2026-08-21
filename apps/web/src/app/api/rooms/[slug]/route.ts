@@ -1,21 +1,24 @@
-import { NextResponse } from "next/server";
-
 import { getRoomBySlug, RoomServiceError } from "@/lib/rooms-service";
+import * as cors from "@/lib/cors";
 
 interface RouteContext {
   params: Promise<{ slug: string }>;
 }
 
-export async function GET(_request: Request, context: RouteContext) {
+export async function GET(request: Request, context: RouteContext) {
   try {
     const { slug } = await context.params;
     const room = await getRoomBySlug(slug);
-    return NextResponse.json(room);
+    return cors.json(request, room);
   } catch (error) {
     if (error instanceof RoomServiceError) {
-      return NextResponse.json({ error: error.message }, { status: error.status });
+      return cors.error(request, { error: error.message }, { status: error.status });
     }
     console.error(error);
-    return NextResponse.json({ error: "Failed to load room" }, { status: 500 });
+    return cors.error(request, { error: "Failed to load room" }, { status: 500 });
   }
+}
+
+export function OPTIONS(request: Request) {
+  return cors.handleOptions(request);
 }

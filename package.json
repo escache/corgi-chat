@@ -6,14 +6,17 @@
   "packageManager": "pnpm@9.15.0",
   "scripts": {
     "dev": "turbo dev",
-    "build": "turbo build",
+    "build": "turbo build --filter=@corgi-chat/*",
     "lint": "turbo lint --filter=@corgi-chat/*",
     "typecheck": "turbo typecheck --filter=@corgi-chat/*",
     "test": "turbo test --filter=@corgi-chat/*",
     "db:generate": "pnpm --filter @corgi-chat/db generate",
     "db:push": "pnpm --filter @corgi-chat/db push",
     "setup:clerk": "bash scripts/setup-clerk.sh",
-    "legacy:start": "concurrently -n client,server -c blue,magenta \"pnpm --filter client start\" \"pnpm --filter server start-dev\""
+    "legacy:start": "concurrently -n client,server -c blue,magenta \"pnpm --filter client start\" \"pnpm --filter server start-dev\"",
+    "desktop:dev": "pnpm --filter @corgi-chat/desktop tauri:dev",
+    "desktop:build": "pnpm --filter @corgi-chat/desktop tauri:build",
+    "desktop:preview": "pnpm --filter @corgi-chat/desktop preview"
   },
   "devDependencies": {
     "concurrently": "^9.1.2",

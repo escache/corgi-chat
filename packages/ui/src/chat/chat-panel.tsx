@@ -1,7 +1,7 @@
 "use client";
 
 import type { ChatMessage } from "@corgi-chat/core";
-import { fetchMessages, useMessages, useSendMessage } from "@corgi-chat/core";
+import { fetchMessages, useMessageNotifications, useMessages, useSendMessage } from "@corgi-chat/core";
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { Theme } from "emoji-picker-react";
 
@@ -19,6 +19,8 @@ export interface ChatPanelProps {
   /** Compact sidebar layout for in-call view */
   compact?: boolean;
   className?: string;
+  currentUserId?: string;
+  roomName?: string;
 }
 
 function formatTime(iso: string) {
@@ -71,6 +73,8 @@ export function ChatPanel({
   giphyApiKey,
   compact = false,
   className,
+  currentUserId,
+  roomName,
 }: ChatPanelProps) {
   const messagesQuery = useMessages(roomSlug, enabled);
   const sendMessage = useSendMessage(roomSlug);
@@ -89,6 +93,8 @@ export function ChatPanel({
   const allMessages = [...earlierMessages, ...liveMessages].filter(
     (message, index, list) => list.findIndex((item) => item.id === message.id) === index,
   );
+
+  useMessageNotifications(allMessages, currentUserId, roomName);
 
   useEffect(() => {
     if (messagesQuery.data) {

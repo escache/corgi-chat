@@ -76,9 +76,18 @@ export function HomeLobby({
 
               <form
                 className="space-y-4"
-                onSubmit={(event) => {
+                onSubmit={async (event) => {
                   event.preventDefault();
-                  void onCreateRoom(roomName);
+                  if (!isSignedIn && guestName.trim()) {
+                    try {
+                      await onContinueAsGuest(guestName.trim());
+                    } catch {
+                      return;
+                    }
+                  }
+                  if (roomName.trim()) {
+                    void onCreateRoom(roomName.trim());
+                  }
                 }}
               >
                 <label className="block space-y-2">

@@ -1,14 +1,13 @@
-import { NextResponse } from "next/server";
-
 import { createGuestUser, RoomServiceError } from "@/lib/rooms-service";
 import { GUEST_COOKIE_MAX_AGE, GUEST_COOKIE_NAME } from "@/lib/guest";
+import * as cors from "@/lib/cors";
 
 export async function POST(request: Request) {
   try {
     const body = (await request.json()) as { displayName?: string };
     const { user, guestToken } = await createGuestUser(body.displayName ?? "");
 
-    const response = NextResponse.json({ guestToken, userId: user.id });
+    const response = cors.json(request, { guestToken, userId: user.id });
     response.cookies.set(GUEST_COOKIE_NAME, guestToken, {
       httpOnly: true,
       sameSite: "lax",
@@ -20,9 +19,13 @@ export async function POST(request: Request) {
     return response;
   } catch (error) {
     if (error instanceof RoomServiceError) {
-      return NextResponse.json({ error: error.message }, { status: error.status });
+      return cors.error(request, { error: error.message }, { status: error.status });
     }
     console.error(error);
-    return NextResponse.json({ error: "Failed to create guest session" }, { status: 500 });
+    return cors.error(request, { error: "Failed to create guest session" }, { status: 500 });
   }
+}
+
+export function OPTIONS(request: Request) {
+  return cors.handleOptions(request);
 }
