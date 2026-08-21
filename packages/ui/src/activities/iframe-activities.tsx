@@ -1,6 +1,7 @@
 "use client";
 
 import type { ActivityProps } from "@corgi-chat/core";
+import { usePlatform } from "@corgi-chat/core";
 import { useMemo, useState } from "react";
 
 import { Button } from "../components/button";
@@ -16,15 +17,70 @@ function addHttps(value: string) {
   return `https://${value.trim()}`;
 }
 
+interface InlineOrExternalProps {
+  src: string;
+  title: string;
+  allow?: string;
+  sandbox?: string;
+  canOpenInNewWindow?: boolean;
+}
+
+function InlineOrExternal({
+  src,
+  title,
+  allow,
+  sandbox,
+  canOpenInNewWindow = true,
+}: InlineOrExternalProps) {
+  const platform = usePlatform();
+
+  if (!platform.supportsInlineIframes && canOpenInNewWindow) {
+    return (
+      <div className="flex h-full min-h-[240px] flex-col items-center justify-center gap-3 bg-slate-950 p-6 text-center">
+        <p className="text-sm text-slate-400">
+          This embed needs a public web origin. Open it in the platform browser instead.
+        </p>
+        <Button
+          size="sm"
+          onClick={() => {
+            if (platform.openIframeActivity) {
+              void platform.openIframeActivity(src);
+            } else {
+              void platform.openExternal(src);
+            }
+          }}
+        >
+          Open {title}
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <iframe
+      title={title}
+      src={src}
+      className="min-h-0 flex-1 border-0"
+      allow={allow}
+      sandbox={sandbox}
+      allowFullScreen
+    />
+  );
+}
+
 export function TwitchActivity({ isHost }: ActivityProps) {
+  const platform = usePlatform();
   const [channelInput, setChannelInput] = useState("twitch");
   const [channel, setChannel] = useState("twitch");
 
   const src = useMemo(() => {
-    const parent =
-      typeof window !== "undefined" ? window.location.hostname : "localhost";
+    const parent = platform.supportsInlineIframes
+      ? typeof window !== "undefined"
+        ? window.location.hostname
+        : "localhost"
+      : "localhost";
     return `https://player.twitch.tv/?channel=${encodeURIComponent(channel)}&parent=${parent}&muted=true`;
-  }, [channel]);
+  }, [channel, platform]);
 
   return (
     <div className="flex h-full min-h-[240px] flex-col bg-slate-950">
@@ -47,7 +103,7 @@ export function TwitchActivity({ isHost }: ActivityProps) {
           Load
         </Button>
       </form>
-      <iframe title="Twitch" src={src} className="min-h-0 flex-1 border-0" allowFullScreen />
+      <InlineOrExternal src={src} title="Twitch" allow="fullscreen" />
     </div>
   );
 }
@@ -68,7 +124,12 @@ export function ExcalidrawActivity(_props: ActivityProps) {
       <div className="border-b border-slate-800 px-3 py-2 text-xs text-slate-400">
         Excalidraw room (iframe). Collaboration uses Excalidraw&apos;s own sync.
       </div>
-      <iframe title="Excalidraw" src={url} className="min-h-0 flex-1 border-0" allow="clipboard-write" />
+      <InlineOrExternal
+        src={url}
+        title="Excalidraw"
+        allow="clipboard-write"
+        canOpenInNewWindow={false}
+      />
     </div>
   );
 }
@@ -98,7 +159,11 @@ export function SharedIframeActivity({ isHost }: ActivityProps) {
           Load
         </Button>
       </form>
-      <iframe title="Shared browser" src={url} className="min-h-0 flex-1 border-0" sandbox="allow-scripts allow-same-origin allow-forms allow-popups" />
+      <InlineOrExternal
+        src={url}
+        title="Shared browser"
+        sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+      />
     </div>
   );
 }

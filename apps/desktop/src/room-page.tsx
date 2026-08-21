@@ -1,18 +1,25 @@
-"use client";
-
-import { useJoinRoom, useLiveKitToken, useRoom, useSupabaseMessageRealtime } from "@corgi-chat/core";
+import {
+  fetchCurrentUser,
+  useJoinRoom,
+  useLiveKitToken,
+  useRoom,
+  useSupabaseMessageRealtime,
+  usePlatform,
+} from "@corgi-chat/core";
 import { Button, CallPreview, ChatPanel, RoomLobby, VideoRoom } from "@corgi-chat/ui";
-import { useParams, useRouter } from "next/navigation";
+import { listen } from "@tauri-apps/api/event";
 import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 
 import "@livekit/components-styles";
+import { invoke } from "@tauri-apps/api/core";
 
 type RoomView = "lobby" | "preview" | "call";
 
-export default function RoomPage() {
-  const params = useParams<{ slug: string }>();
-  const router = useRouter();
-  const slug = params.slug;
+export function RoomPage() {
+  const { slug = "" } = useParams<{ slug: string }>();
+  const navigate = useNavigate();
+  const platform = usePlatform();
   const roomQuery = useRoom(slug);
   const joinRoom = useJoinRoom(slug);
   const [view, setView] = useState<RoomView>("lobby");
@@ -23,8 +30,7 @@ export default function RoomPage() {
   const [showCallChat, setShowCallChat] = useState(true);
 
   const tokenQuery = useLiveKitToken(slug, view === "call");
-  const chatEnabled =
-    Boolean(currentUserId) && (view === "lobby" || view === "call");
+  const chatEnabled = Boolean(currentUserId) && (view === "lobby" || view === "call");
 
   useSupabaseMessageRealtime(slug, {
     enabled: chatEnabled,
@@ -32,18 +38,46 @@ export default function RoomPage() {
   });
 
   useEffect(() => {
-    void fetch("/api/me")
-      .then((response) => (response.ok ? response.json() : null))
-      .then((body: { userId?: string; displayName?: string } | null) => {
-        if (body?.userId) {
-          setCurrentUserId(body.userId);
-        }
-        if (body?.displayName) {
-          setDisplayName(body.displayName);
+    void fetchCurrentUser()
+      .then((user) => {
+        if (user) {
+          setCurrentUserId(user.userId);
+          setDisplayName(user.displayName);
         }
       })
       .catch(() => undefined);
-  }, []);
+  }, [slug]);
+
+  useEffect(() => {
+    if (roomQuery.data) {
+      void invoke("add_recent_room", {
+        slug: roomQuery.data.slug,
+        name: roomQuery.data.name,
+      });
+    }
+  }, [roomQuery.data?.slug, roomQuery.data?.name]);
+
+  useEffect(() => {
+    const unlisten = listen<string>("global-shortcut", (event) => {
+      if (event.payload === "toggle-mute") {
+        // The VideoRoom component can also listen for this event if needed.
+        // For now we emit a DOM event that the shared UI can hook into.
+        window.dispatchEvent(new CustomEvent("corgi:toggle-mute"));
+      }
+    });
+
+    const deepLinkUnsub = platform.onDeepLink((url) => {
+      const match = url.match(/^corgi-chat:\/\/r\/(.+)$/);
+      if (match?.[1] && match[1] !== slug) {
+        navigate(`/r/${match[1]}`);
+      }
+    });
+
+    return () => {
+      void unlisten.then((off) => off());
+      deepLinkUnsub?.();
+    };
+  }, [navigate, platform, slug]);
 
   if (roomQuery.isLoading) {
     return (
@@ -95,8 +129,7 @@ export default function RoomPage() {
     }
 
     if (tokenQuery.isError || !tokenQuery.data) {
-      const message =
-        tokenQuery.error instanceof Error ? tokenQuery.error.message : "Video unavailable";
+      const message = tokenQuery.error instanceof Error ? tokenQuery.error.message : "Video unavailable";
 
       return (
         <div className="min-h-screen bg-slate-950 px-6 py-10 text-white">
@@ -124,7 +157,7 @@ export default function RoomPage() {
         <div className="mx-auto flex h-[calc(100vh-3rem)] max-w-7xl flex-col gap-4">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <Button variant="ghost" size="sm" onClick={() => router.push("/")}>
+              <Button variant="ghost" size="sm" onClick={() => navigate("/")}>
                 ← Home
               </Button>
               <h1 className="text-xl font-semibold">{roomQuery.data.name}</h1>
@@ -144,7 +177,7 @@ export default function RoomPage() {
               >
                 ← Back to lobby
               </button>
-              <Button variant="ghost" size="sm" onClick={() => router.push("/")}>
+              <Button variant="ghost" size="sm" onClick={() => navigate("/")}>
                 Leave room
               </Button>
             </div>
@@ -170,7 +203,7 @@ export default function RoomPage() {
                 roomSlug={slug}
                 enabled
                 compact
-                giphyApiKey={process.env.NEXT_PUBLIC_GIPHY_API_KEY}
+                giphyApiKey={import.meta.env.VITE_GIPHY_API_KEY}
                 currentUserId={currentUserId}
                 roomName={roomQuery.data.name}
               />
@@ -188,9 +221,9 @@ export default function RoomPage() {
       livekitConfigured={livekitConfigured}
       isJoining={joinRoom.isPending}
       error={error}
-      giphyApiKey={process.env.NEXT_PUBLIC_GIPHY_API_KEY}
-      onHome={() => router.push("/")}
-      onLeaveRoom={() => router.push("/")}
+      giphyApiKey={import.meta.env.VITE_GIPHY_API_KEY}
+      onHome={() => navigate("/")}
+      onLeaveRoom={() => navigate("/")}
       onStartVideo={() => setView("preview")}
       onJoinLobby={async () => {
         setError(null);

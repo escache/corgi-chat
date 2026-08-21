@@ -1,5 +1,5 @@
 import { auth, currentUser } from "@clerk/nextjs/server";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { eq } from "drizzle-orm";
 
 import { getDb, users, type User } from "@corgi-chat/db";
@@ -42,8 +42,11 @@ export async function getCurrentUser(): Promise<User | null> {
     }
   }
 
+  const headerStore = await headers();
+  const authHeader = headerStore.get("authorization") ?? "";
+  const bearerToken = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
   const cookieStore = await cookies();
-  const guestToken = cookieStore.get(GUEST_COOKIE_NAME)?.value;
+  const guestToken = bearerToken || cookieStore.get(GUEST_COOKIE_NAME)?.value;
   if (!guestToken) {
     return null;
   }
